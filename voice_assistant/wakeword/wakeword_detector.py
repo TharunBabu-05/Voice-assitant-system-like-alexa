@@ -1,10 +1,15 @@
+
 import pvporcupine
 import pyaudio
 import struct
+import config
 
 class WakeWordDetector:
     def __init__(self, keyword_path):
-        self.porcupine = pvporcupine.create(keyword_paths=[keyword_path])
+        self.porcupine = pvporcupine.create(
+            access_key=config.PORCUPINE_ACCESS_KEY,
+            keyword_paths=[keyword_path]
+        )
         self.pa = pyaudio.PyAudio()
         self.stream = self.pa.open(
             rate=self.porcupine.sample_rate,
