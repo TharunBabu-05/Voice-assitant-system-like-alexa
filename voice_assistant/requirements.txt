@@ -10,3 +10,7 @@ simpleaudio
 google-api-python-client
 openai
 pygame
+
+# Free/Offline TTS & STT
+pyttsx3
+soundfile
