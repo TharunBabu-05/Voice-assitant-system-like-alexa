@@ -10,3 +10,7 @@ pygame
 pyttsx3
 soundfile
 vosk
+
+# ReSpeaker LED Control
+apa102-pi
+spidev
