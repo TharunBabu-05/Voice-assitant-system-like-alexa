@@ -1,6 +1,7 @@
 import RPi.GPIO as GPIO
 import config
 
+GPIO.setwarnings(False)  # Disable GPIO warnings
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(config.GPIO_LED_PIN, GPIO.OUT)
 

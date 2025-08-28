@@ -1,16 +1,12 @@
 pyaudio
 numpy
 pvporcupine
-google-cloud-speech
-google-cloud-texttospeech
 RPi.GPIO
 requests
-simpleaudio
 # Optional
-google-api-python-client
-openai
 pygame
 
 # Free/Offline TTS & STT
 pyttsx3
 soundfile
+vosk
