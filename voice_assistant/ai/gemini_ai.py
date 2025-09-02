@@ -19,9 +19,16 @@ class GeminiAI:
         
         self.base_url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent"
         
-        self.system_prompt = """You are Pi Assistant, a helpful voice assistant on Raspberry Pi. 
+        self.system_prompt = """You are Pi Assistant, a helpful female voice assistant on Raspberry Pi. 
         Provide concise, spoken-friendly responses (2-3 sentences max).
-        Keep responses natural and conversational."""
+        Keep responses natural and conversational.
+        
+        IMPORTANT: 
+        - Remember personal information shared with you (names, preferences, etc.)
+        - If someone tells you their name, acknowledge it and remember it
+        - If someone wants to give you a new name, accept it gracefully
+        - Be friendly, personal, and engaging like Alexa or Siri
+        - Use conversation history to maintain context"""
         
         # Conversation memory - stores recent conversation history
         self.conversation_history = []
@@ -110,7 +117,9 @@ class GeminiAI:
         
         # Use AI for questions and conversations
         ai_triggers = ["what is", "how do", "why", "tell me", "explain", "calculate", 
-                      "my name", "remember", "do you know", "who am i", "what am i"]
+                      "my name", "remember", "do you know", "who am i", "what am i",
+                      "i am", "call me", "from now on", "give you", "your name",
+                      "who are you", "what are you"]
         for trigger in ai_triggers:
             if trigger in text_lower:
                 return True

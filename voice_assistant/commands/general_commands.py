@@ -5,9 +5,8 @@ import re
 def handle(text):
     text = text.lower()
     
-    # Name and identity
-    if "your name" in text or "who are you" in text:
-        return "I am Pi Assistant, your intelligent voice assistant powered by Raspberry Pi and Gemini AI. How can I help you today?"
+    # Remove name/identity handling - let AI handle all name-related questions
+    # This ensures conversation memory works properly
     
     # Greetings - use word boundaries to avoid false matches
     greeting_patterns = [
@@ -26,13 +25,21 @@ def handle(text):
         else:
             return "Hello! I'm here to help. What do you need?"
     
-    # Time
-    if "time" in text and ("what" in text or "current" in text or "tell me" in text):
+    # Time - make more specific to avoid false matches
+    time_patterns = [
+        "what time is it", "current time", "tell me the time", 
+        "what is the time", "time is it"
+    ]
+    if any(pattern in text for pattern in time_patterns):
         now = datetime.datetime.now().strftime('%I:%M %p')
         return f"The current time is {now}."
     
-    # Date
-    if "date" in text and ("what" in text or "today" in text or "current" in text):
+    # Date - make more specific to avoid false matches  
+    date_patterns = [
+        "what date is it", "current date", "tell me the date",
+        "what is the date", "today's date", "what day is it"
+    ]
+    if any(pattern in text for pattern in date_patterns):
         today = datetime.datetime.now().strftime('%A, %B %d, %Y')
         return f"Today is {today}."
     

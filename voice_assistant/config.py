@@ -23,3 +23,11 @@ GEMINI_API_KEY = "AIzaSyB0VqfCJH_ks9Wgi8ZAlZe_r5x322TUkp8"  # Set this to your G
 ENABLE_AI = True  # Set to False to disable AI features
 AI_MAX_RESPONSE_LENGTH = 200  # Maximum tokens for AI responses
 AI_TEMPERATURE = 0.7  # Creativity level (0.0 to 1.0)
+
+# Voice/TTS Configuration
+VOICE_TYPE = 'custom'  # Using en+f2
+VOICE_SPEED = 160               # Speech speed (words per minute)
+VOICE_VOLUME = 0.9              # Volume level (0.0 to 1.0)
+TTS_ENGINE = 'pyttsx3'          # Options: pyttsx3, espeak, festival
+
+CUSTOM_VOICE = 'en+f2'  # Selected during setup
