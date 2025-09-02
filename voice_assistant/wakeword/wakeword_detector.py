@@ -10,25 +10,6 @@ class WakeWordDetector:
             access_key=config.PORCUPINE_ACCESS_KEY,
             keyword_paths=[keyword_path]
         )
-<<<<<<< HEAD
-        self.pa = pyaudio.PyAudio()
-        self.stream = self.pa.open(
-            rate=self.porcupine.sample_rate,
-            channels=1,
-            format=pyaudio.paInt16,
-            input=True,
-            frames_per_buffer=self.porcupine.frame_length
-        )
-
-    def detect(self):
-        print('Listening for wake word...')
-        while True:
-            pcm = self.stream.read(self.porcupine.frame_length, exception_on_overflow=False)
-            pcm = struct.unpack_from("h" * self.porcupine.frame_length, pcm)
-            result = self.porcupine.process(pcm)
-            if result >= 0:
-                return True
-=======
         self.pa = None
         self.stream = None
 
@@ -81,4 +62,3 @@ class WakeWordDetector:
         if self.porcupine:
             self.porcupine.delete()
             self.porcupine = None
->>>>>>> master

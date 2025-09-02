@@ -10,11 +10,11 @@ pygame
 pyttsx3
 soundfile
 vosk
-<<<<<<< HEAD
-=======
 openai-whisper  # Better speech recognition
->>>>>>> master
 
 # ReSpeaker LED Control
 apa102-pi
 spidev
+
+# AI Integration
+google-generativeai

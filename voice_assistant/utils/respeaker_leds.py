@@ -9,15 +9,9 @@ class ReSpeakerLEDs:
             self.spi.open(0, 0)   # bus 0, device 0
             self.spi.max_speed_hz = 8000000
             self.num_leds = 3  # ReSpeaker 2-Mics has 3 LEDs
-<<<<<<< HEAD
-            print("✓ ReSpeaker LEDs initialized")
-        except Exception as e:
-            print(f"✗ LED initialization failed: {e}")
-=======
             print("✅ ReSpeaker LEDs initialized")
         except Exception as e:
             print(f"❌ LED initialization failed: {e}")
->>>>>>> master
             self.spi = None
     
     def apa102_send_all(self, colors):
@@ -29,204 +23,159 @@ class ReSpeakerLEDs:
             # Start frame
             self.spi.xfer2([0x00, 0x00, 0x00, 0x00])
             
-            # LED frames (brightness + BGR for each LED)
+            # LED data
             for color in colors:
-                brightness = 0xE0 | 0x1F  # Full brightness
-                self.spi.xfer2([brightness, color[2], color[1], color[0]])  # BGR format
+                brightness = 0xFF  # Max brightness
+                blue = color & 0xFF
+                green = (color >> 8) & 0xFF
+                red = (color >> 16) & 0xFF
+                
+                # APA102 format: [brightness, blue, green, red]
+                self.spi.xfer2([brightness, blue, green, red])
             
             # End frame
             self.spi.xfer2([0xFF, 0xFF, 0xFF, 0xFF])
+            
         except Exception as e:
             print(f"LED error: {e}")
-<<<<<<< HEAD
-    
-=======
 
->>>>>>> master
-    def set_individual_colors(self, color1, color2, color3):
-        """Set each LED to a different color"""
-        colors = [color1, color2, color3]
-        self.apa102_send_all(colors)
-    
-    def set_color_all(self, red, green, blue):
-        """Set all 3 LEDs to the same color"""
-        colors = [(red, green, blue)] * self.num_leds
-        self.apa102_send_all(colors)
-    
-    def wake_word_animation(self):
-<<<<<<< HEAD
-        """Blue wave animation for wake word detection"""
-        print("🔵 Wake word detected!")
-        for cycle in range(3):  # 3 cycles of animation
-            for step in range(6):  # 6 steps for smooth transition
-                # Create a blue wave effect
-                colors = []
-                for i in range(3):
-                    # Calculate intensity based on step and LED position
-                    intensity = abs(((step + i) % 6) - 3) * 85  # 0 to 255
-                    colors.append((0, 0, intensity))
-                
-                self.set_individual_colors(*colors)
-                time.sleep(0.1)
-    
-    def listening_animation(self):
-        """Green gradient while listening"""
-        print("🟢 Listening...")
-        # Create green gradient: bright -> medium -> dim
-        self.set_individual_colors(
-            (0, 255, 0),  # LED 1: Bright green
-            (0, 180, 0),  # LED 2: Medium green  
-            (0, 100, 0)   # LED 3: Dim green
-        )
-    
-    def speaking_animation(self):
-        """Orange flowing animation while speaking"""
-        print("🟠 Speaking...")
-        # Create flowing orange effect
-        for cycle in range(2):  # 2 quick cycles
-            for step in range(3):
-                colors = [(0, 0, 0)] * 3  # Start with all off
-                
-                # Light up LEDs in sequence with orange gradient
-                for i in range(3):
-                    if (step + i) % 3 == 0:
-                        colors[i] = (255, 165, 0)  # Bright orange
-                    elif (step + i) % 3 == 1:
-                        colors[i] = (200, 100, 0)  # Medium orange
-                    else:
-                        colors[i] = (100, 50, 0)   # Dim orange
-                
-                self.set_individual_colors(*colors)
-                time.sleep(0.2)
-    
-    def error_animation(self):
-        """Red pulsing animation for errors"""
-        print("🔴 Error!")
-        for pulse in range(3):
-            # Pulse all LEDs red with different intensities
-            self.set_individual_colors(
-                (255, 0, 0),  # LED 1: Bright red
-                (180, 0, 0),  # LED 2: Medium red
-                (100, 0, 0)   # LED 3: Dim red
-            )
-            time.sleep(0.3)
-            self.set_color_all(50, 0, 0)  # All dim red
-            time.sleep(0.3)
-        self.turn_off()
-    
-=======
-        """Enhanced blue wave animation for wake word detection"""
-        print("🔵 Wake word detected!")
-        for cycle in range(4):  # 4 cycles of animation
-            for step in range(9):  # 9 steps for smoother transition
-                colors = []
-                for i in range(3):
-                    # Create a more dynamic wave with different intensities
-                    wave_position = (step + i * 3) % 9
-                    if wave_position < 3:
-                        # Bright blue wave
-                        intensity = int(255 * (wave_position + 1) / 3)
-                        colors.append((0, 50, intensity))  # Add slight green for cyan effect
-                    elif wave_position < 6:
-                        # Peak brightness with white-blue
-                        intensity = 255
-                        colors.append((20, 100, intensity))  # Bright cyan-blue
-                    else:
-                        # Fade out
-                        intensity = int(255 * (9 - wave_position) / 3)
-                        colors.append((0, 0, intensity))
-                
-                self.set_individual_colors(*colors)
-                time.sleep(0.08)
-    
-    def listening_animation(self):
-        """Enhanced green breathing animation while listening"""
-        print("🟢 Listening...")
-        # Breathing effect with green gradient
-        for breath in range(3):  # 3 breathing cycles
-            # Breathe in - increasing brightness
-            for intensity in range(50, 256, 25):
-                self.set_individual_colors(
-                    (0, intensity, 0),           # LED 1: Main green
-                    (0, max(0, intensity-30), 0), # LED 2: Slightly dimmer
-                    (0, max(0, intensity-60), 0)  # LED 3: Dimmest
-                )
-                time.sleep(0.05)
-            
-            # Breathe out - decreasing brightness
-            for intensity in range(255, 49, -25):
-                self.set_individual_colors(
-                    (0, intensity, 0),           # LED 1: Main green
-                    (0, max(0, intensity-30), 0), # LED 2: Slightly dimmer
-                    (0, max(0, intensity-60), 0)  # LED 3: Dimmest
-                )
-                time.sleep(0.05)
-
-    def speaking_animation(self):
-        """Enhanced orange/yellow flowing animation while speaking"""
-        print("🟡 Speaking...")
-        # Create a dynamic flowing effect with warm colors
-        for cycle in range(3):  # 3 cycles
-            for step in range(6):
-                colors = []
-                for i in range(3):
-                    # Create flowing warm color effect
-                    position = (step + i * 2) % 6
-                    if position == 0:
-                        colors.append((255, 200, 0))    # Bright yellow-orange
-                    elif position == 1:
-                        colors.append((255, 150, 0))    # Orange
-                    elif position == 2:
-                        colors.append((255, 100, 0))    # Deep orange
-                    elif position == 3:
-                        colors.append((200, 50, 0))     # Red-orange
-                    elif position == 4:
-                        colors.append((150, 25, 0))     # Dim red-orange
-                    else:
-                        colors.append((100, 0, 0))      # Very dim red
-                
-                self.set_individual_colors(*colors)
-                time.sleep(0.15)
-    
-    def error_animation(self):
-        """Enhanced red warning animation for errors"""
-        print("🔴 Error!")
-        for pulse in range(4):  # 4 pulses
-            # Flash all LEDs bright red with different patterns
-            if pulse % 2 == 0:
-                self.set_individual_colors(
-                    (255, 0, 0),  # LED 1: Bright red
-                    (150, 0, 0),  # LED 2: Medium red
-                    (100, 0, 0)   # LED 3: Dim red
-                )
-            else:
-                self.set_individual_colors(
-                    (100, 0, 0),  # LED 1: Dim red
-                    (255, 0, 0),  # LED 2: Bright red
-                    (150, 0, 0)   # LED 3: Medium red
-                )
-            time.sleep(0.2)
-            
-            # Brief off period
-            self.set_color_all(20, 0, 0)  # Very dim red
-            time.sleep(0.1)
-        self.turn_off()
-
->>>>>>> master
     def turn_off(self):
         """Turn off all LEDs"""
-        self.set_color_all(0, 0, 0)
-        print("⚫ LEDs off")
-    
-    def __del__(self):
-        """Clean up SPI connection"""
+        colors = [0x000000] * self.num_leds  # All black
+        self.apa102_send_all(colors)
+
+    def set_solid_color(self, color):
+        """Set all LEDs to the same solid color"""
+        colors = [color] * self.num_leds
+        self.apa102_send_all(colors)
+
+    def wake_word_animation(self):
+        """Quick blue flash for wake word detection"""
+        print("🔵 Wake word detected - Blue flash")
+        
+        # Quick blue flash - no delay
+        self.set_solid_color(0x0066FF)  # Blue
+        time.sleep(0.1)  # Very brief flash
+
+    def listening_animation(self):
+        """Solid green during recording - no animation delay"""
+        print("🟢 Recording - Green LED")
+        
+        # Solid green - no breathing animation to avoid delays
+        self.set_solid_color(0x00FF00)  # Solid green
+
+    def speaking_animation(self):
+        """Enhanced orange/yellow flowing animation while speaking/processing"""
+        print("🟡 Speaking/Processing - Orange flowing animation")
+        
+        # Flowing orange/yellow pattern
+        for cycle in range(4):  # Multiple cycles for longer responses
+            for i in range(self.num_leds * 3):
+                colors = [0x000000] * self.num_leds
+                
+                # Create flowing pattern
+                for led in range(self.num_leds):
+                    phase = (i + led) % (self.num_leds * 2)
+                    if phase < self.num_leds:
+                        # Orange to yellow gradient
+                        intensity = min(255, max(0, 255 - abs(phase - self.num_leds//2) * 60))
+                        red = intensity
+                        green = intensity // 2
+                        colors[led] = (red << 16) | (green << 8)  # Orange/yellow
+                
+                self.apa102_send_all(colors)
+                time.sleep(0.06)
+
+    def error_animation(self):
+        """Enhanced red warning animation for errors"""
+        print("🔴 Error - Red warning animation")
+        
+        # Pulsing red warning
+        for pulse in range(3):
+            # Quick flash
+            self.set_solid_color(0xFF0000)  # Bright red
+            time.sleep(0.1)
+            self.set_solid_color(0x330000)  # Dim red
+            time.sleep(0.1)
+        
+        # Fade out
+        for intensity in range(51, 0, -5):
+            color = intensity << 16  # Red channel
+            self.set_solid_color(color)
+            time.sleep(0.05)
+
+    def success_animation(self):
+        """Green success animation"""
+        print("✅ Success - Green confirmation")
+        
+        # Quick green flash
+        self.set_solid_color(0x00FF00)  # Bright green
+        time.sleep(0.2)
+        self.set_solid_color(0x003300)  # Dim green
+        time.sleep(0.1)
+        self.turn_off()
+
+    def rainbow_animation(self, duration=3):
+        """Fun rainbow animation"""
+        print("🌈 Rainbow animation")
+        
+        start_time = time.time()
+        while time.time() - start_time < duration:
+            for hue in range(0, 360, 30):
+                colors = []
+                for i in range(self.num_leds):
+                    # Convert HSV to RGB
+                    color = self._hsv_to_rgb((hue + i * 120) % 360, 1.0, 1.0)
+                    colors.append(color)
+                
+                self.apa102_send_all(colors)
+                time.sleep(0.1)
+
+    def _hsv_to_rgb(self, h, s, v):
+        """Convert HSV to RGB color"""
+        h = h / 360.0
+        i = int(h * 6.0)
+        f = (h * 6.0) - i
+        p = v * (1.0 - s)
+        q = v * (1.0 - s * f)
+        t = v * (1.0 - s * (1.0 - f))
+        i = i % 6
+        
+        if i == 0:
+            r, g, b = v, t, p
+        elif i == 1:
+            r, g, b = q, v, p
+        elif i == 2:
+            r, g, b = p, v, t
+        elif i == 3:
+            r, g, b = p, q, v
+        elif i == 4:
+            r, g, b = t, p, v
+        elif i == 5:
+            r, g, b = v, p, q
+        
+        r = int(r * 255)
+        g = int(g * 255)
+        b = int(b * 255)
+        
+        return (r << 16) | (g << 8) | b
+
+    def cleanup(self):
+        """Clean up SPI resources"""
+        self.turn_off()
         if self.spi:
-            self.turn_off()
             self.spi.close()
 
-# Global LED controller instance
-<<<<<<< HEAD
-led_controller = ReSpeakerLEDs()
-=======
-led_controller = ReSpeakerLEDs()
->>>>>>> master
+# Create global LED controller instance
+try:
+    led_controller = ReSpeakerLEDs()
+except Exception as e:
+    print(f"❌ Failed to initialize LED controller: {e}")
+    # Create dummy controller for systems without LEDs
+    class DummyLEDs:
+        def __getattr__(self, name):
+            def dummy_method(*args, **kwargs):
+                print(f"LED: {name} (dummy)")
+            return dummy_method
+    
+    led_controller = DummyLEDs()

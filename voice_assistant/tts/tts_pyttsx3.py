@@ -16,24 +16,13 @@ def speak_text(text):
         result = os.system(f'espeak -a 200 -s 150 "{text}"')
         
         if result == 0:
-<<<<<<< HEAD
-            print(f"✓ Spoke: {text}")
+            print(f"🔊 Spoke: {text}")
             return True
         else:
-            print(f"✗ espeak failed with code: {result}")
+            print(f"❌ espeak failed with code: {result}")
             return False
             
     except Exception as e:
-        print(f"✗ TTS error: {e}")
-=======
-            print(f"? Spoke: {text}")
-            return True
-        else:
-            print(f"? espeak failed with code: {result}")
-            return False
-            
-    except Exception as e:
-        print(f"? TTS error: {e}")
->>>>>>> master
+        print(f"❌ TTS error: {e}")
         print(f"Response (no audio): {text}")
         return False

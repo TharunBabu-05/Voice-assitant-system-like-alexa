@@ -1,25 +1,3 @@
-<<<<<<< HEAD
-import requests
-import config
-
-class WhisperSTT:
-    def __init__(self, api_key):
-        self.api_key = api_key
-
-    def transcribe(self, audio_data):
-        headers = {"Authorization": f"Bearer {self.api_key}"}
-        files = {"file": ("audio.wav", audio_data, "audio/wav")}
-        data = {"model": "whisper-1"}
-        response = requests.post(
-            "https://api.openai.com/v1/audio/transcriptions",
-            headers=headers,
-            data=data,
-            files=files
-        )
-        if response.ok:
-            return response.json().get("text", "")
-        return ""
-=======
 import whisper
 import numpy as np
 import tempfile
@@ -29,81 +7,101 @@ import soundfile as sf
 class WhisperSTT:
     def __init__(self, model_size="base"):
         """
-        Initialize Whisper STT with specified model size
-        Model sizes: tiny, base, small, medium, large
-        For Raspberry Pi, recommend: tiny (fastest) or base (good balance)
-        """
-        print(f"🎤 Loading Whisper {model_size} model...")
-        try:
-            self.model = whisper.load_model(model_size)
-            print(f"✅ Whisper {model_size} model loaded successfully")
-        except Exception as e:
-            print(f"❌ Failed to load Whisper model: {e}")
-            # Fallback to tiny model if requested model fails
-            if model_size != "tiny":
-                print("🔄 Trying tiny model as fallback...")
-                self.model = whisper.load_model("tiny")
-            else:
-                raise e
-    
-    def transcribe(self, audio_data, channels=1):
-        """
-        Transcribe audio data using Whisper
+        Initialize Whisper STT with local model
         
         Args:
-            audio_data: Raw audio bytes from AudioRecorder
-            channels: Number of audio channels (1 for mono, 2 for stereo)
+            model_size (str): Size of Whisper model to use.
+                             Options: tiny, base, small, medium, large
+                             tiny is fastest but less accurate
+                             base is a good balance
+        """
+        self.model_size = model_size
+        print(f"🔄 Loading Whisper model '{model_size}'...")
+        try:
+            self.model = whisper.load_model(model_size)
+            print(f"✅ Whisper model '{model_size}' loaded successfully!")
+        except Exception as e:
+            print(f"❌ Failed to load Whisper model: {e}")
+            print("💡 Trying to download model...")
+            try:
+                self.model = whisper.load_model(model_size, download_root=None)
+                print(f"✅ Whisper model '{model_size}' downloaded and loaded!")
+            except Exception as e2:
+                print(f"❌ Failed to download Whisper model: {e2}")
+                # Fallback to tiny model if requested model fails
+                if model_size != "tiny":
+                    print("🔄 Trying tiny model as fallback...")
+                    self.model = whisper.load_model("tiny")
+                    self.model_size = "tiny"
+                else:
+                    raise
+
+    def transcribe(self, audio_data, channels=1):
+        """
+        Transcribe audio data using local Whisper model
         
+        Args:
+            audio_data (bytes): Raw audio data
+            channels (int): Number of audio channels (1 or 2)
+            
         Returns:
             str: Transcribed text
         """
         try:
-            # Create temporary audio file
-            with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as temp_file:
-                temp_filename = temp_file.name
-            
             # Convert bytes to numpy array
             if isinstance(audio_data, bytes):
                 audio_array = np.frombuffer(audio_data, dtype=np.int16)
             else:
                 audio_array = audio_data
             
-            # Convert to float32 and normalize (Whisper expects float32 between -1 and 1)
+            # Handle multichannel audio by converting to mono
+            if channels == 2 and len(audio_array) > 0:
+                # Reshape to 2D array (samples, channels) and take mean
+                audio_array = audio_array.reshape(-1, 2)
+                audio_array = np.mean(audio_array, axis=1).astype(np.int16)
+            
+            # Convert to float32 and normalize to [-1, 1] range as required by Whisper
             audio_float = audio_array.astype(np.float32) / 32768.0
             
-            # Handle stereo to mono conversion if needed
-            if channels == 2 and len(audio_float) > 0:
-                audio_float = audio_float.reshape(-1, 2)
-                audio_float = np.mean(audio_float, axis=1)  # Convert to mono
+            # Create temporary WAV file for Whisper processing
+            with tempfile.NamedTemporaryFile(suffix='.wav', delete=False) as temp_file:
+                temp_filename = temp_file.name
             
-            # Save as WAV file for Whisper
-            sf.write(temp_filename, audio_float, 16000)
-            
-            # Transcribe using Whisper
-            result = self.model.transcribe(
-                temp_filename,
-                language="en",  # Force English for better performance
-                task="transcribe",
-                fp16=False,  # Use fp32 for better compatibility on RPi
-                verbose=False
-            )
-            
-            # Extract text
-            text = result["text"].strip()
-            
-            # Clean up temporary file
-            if os.path.exists(temp_filename):
-                os.unlink(temp_filename)
-            
-            return text
-            
+            try:
+                # Save audio as WAV file with 16kHz sample rate (Whisper's expected rate)
+                sf.write(temp_filename, audio_float, 16000, format='WAV')
+                
+                # Transcribe using Whisper
+                print("🎯 Transcribing with Whisper...")
+                result = self.model.transcribe(
+                    temp_filename,
+                    language="en",  # Force English for better accuracy
+                    task="transcribe",
+                    fp16=False,  # Use fp32 for better compatibility on Pi
+                    verbose=False  # Reduce output noise
+                )
+                
+                text = result["text"].strip()
+                
+                if text:
+                    print(f"✅ Whisper transcription: '{text}'")
+                    return text
+                else:
+                    print("⚠️ Whisper returned empty transcription")
+                    return ""
+                    
+            except Exception as e:
+                print(f"❌ Whisper transcription failed: {e}")
+                return ""
+            finally:
+                # Clean up temporary file
+                if os.path.exists(temp_filename):
+                    os.unlink(temp_filename)
+                    
         except Exception as e:
-            print(f"❌ Whisper transcription error: {e}")
-            # Clean up on error
-            if 'temp_filename' in locals() and os.path.exists(temp_filename):
-                os.unlink(temp_filename)
+            print(f"❌ Audio preprocessing failed: {e}")
             return ""
-    
+
     def transcribe_audio_array(self, audio_array, sample_rate=16000):
         """
         Alternative method to transcribe directly from numpy array
@@ -131,4 +129,22 @@ class WhisperSTT:
         except Exception as e:
             print(f"❌ Whisper direct transcription error: {e}")
             return ""
->>>>>>> master
+
+    def is_available(self):
+        """Check if Whisper model is loaded and available"""
+        return hasattr(self, 'model') and self.model is not None
+
+    def get_model_info(self):
+        """Get information about the loaded model"""
+        if self.is_available():
+            return {
+                "model_size": self.model_size,
+                "status": "loaded",
+                "type": "local_whisper"
+            }
+        else:
+            return {
+                "model_size": self.model_size,
+                "status": "not_loaded",
+                "type": "local_whisper"
+            }
