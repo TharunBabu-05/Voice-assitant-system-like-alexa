@@ -1,0 +1,46 @@
+# Virtual Environment
+venv/
+env/
+.env
+
+# Python Cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Audio files (if any recordings)
+*.wav
+*.mp3
+*.flac
+
+# Logs
+*.log
+logs/
+
+# API Keys and Config (if sensitive)
+.env
+config.json
+
+# Model files (optional - large files)
+# Uncomment if you want to exclude the Vosk model
+# vosk-model-*/
+
+# Test coverage
+.coverage
+htmlcov/
+
+# Temporary files
+*.tmp
+*.temp

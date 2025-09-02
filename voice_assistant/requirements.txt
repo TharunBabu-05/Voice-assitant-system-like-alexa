@@ -1,0 +1,17 @@
+pyaudio
+numpy
+pvporcupine
+RPi.GPIO
+requests
+# Optional
+pygame
+
+# Free/Offline TTS & STT
+pyttsx3
+soundfile
+vosk
+openai-whisper  # Better speech recognition
+
+# ReSpeaker LED Control
+apa102-pi
+spidev
